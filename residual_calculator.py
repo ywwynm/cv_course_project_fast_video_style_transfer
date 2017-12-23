@@ -30,14 +30,14 @@ def calculate_residual(frame_tensor_1, frame_tensor_2):
   return frame_tensor_2 - frame_tensor_1
 
 
-def get_residuals(in_dir, from_frame_idx, to_frame_idx):
-  print('calculating residuals for ' + in_dir + ', from: ' + str(from_frame_idx) + ', to: ' + str(to_frame_idx))
+def get_residuals(in_dir, from_frame, to_frame):
+  print('calculating residuals for ' + in_dir + ', from: ' + str(from_frame) + ', to: ' + str(to_frame))
   in_files = os.listdir(in_dir)
   print('total files count: ' + str(len(in_files)))
   residuals = []
-  for x in range(from_frame_idx, to_frame_idx - 1):
-    tensor_x = img_to_tensor(in_dir + '\\' + in_files[x])
-    tensor_x_next = img_to_tensor(in_dir + '\\' + in_files[x + 1])
+  for x in range(from_frame, to_frame - 1):
+    tensor_x = img_to_tensor(in_dir + '\\' + in_files[x - 1])
+    tensor_x_next = img_to_tensor(in_dir + '\\' + in_files[x])
     residuals.append(calculate_residual(tensor_x, tensor_x_next))
   print('residuals calculated, size: ' + str(len(residuals)))
   return residuals
