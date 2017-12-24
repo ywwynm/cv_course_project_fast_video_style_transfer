@@ -2,8 +2,9 @@ from __future__ import print_function
 from argparse import ArgumentParser
 import sys
 sys.path.insert(0, 'src')
-import os, random, subprocess, evaluate
-from src.utils import exists, list_files
+import os, random, subprocess
+import fast_style_transfer.evaluate as evaluate
+from fast_style_transfer.src.utils import exists, list_files
 from global_variable import logging as log
 import time
 

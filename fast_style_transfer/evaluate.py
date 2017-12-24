@@ -1,10 +1,12 @@
 from __future__ import print_function
 import sys
 sys.path.insert(0, 'src')
-import transform, numpy as np, vgg, pdb, os
+import fast_style_transfer.src.transform as transform
+import fast_style_transfer.src.vgg as vgg
+import numpy as np, pdb, os
 import scipy.misc
 import tensorflow as tf
-from src.utils import save_img, get_img, exists, list_files
+from fast_style_transfer.src.utils import save_img, get_img, exists, list_files
 from argparse import ArgumentParser
 from collections import defaultdict
 import time

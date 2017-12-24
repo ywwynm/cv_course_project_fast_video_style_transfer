@@ -37,8 +37,8 @@ def get_residuals(frames_dir, frame_from, frame_to):
   log.info('total files count: ' + str(len(in_files)))
   residuals = []
   for x in range(frame_from, frame_to):
-    tensor_x = img_to_tensor(frames_dir + '\\' + in_files[x - 1])
-    tensor_x_next = img_to_tensor(frames_dir + '\\' + in_files[x])
+    tensor_x = img_to_tensor(frames_dir + '/' + in_files[x - 1])
+    tensor_x_next = img_to_tensor(frames_dir + '/' + in_files[x])
     residuals.append(calculate_residual(tensor_x, tensor_x_next))
   log.info('residuals calculated, size: ' + str(len(residuals)))
   return residuals
