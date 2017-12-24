@@ -23,3 +23,6 @@ trs_res_test = res_calc.get_residuals(trs_dir, 15001, 17982)
 np.save(data_dir + '\ori_res_test.npy', ori_res_test)
 np.save(data_dir + '\\trs_res_test.npy', trs_res_test)
 
+
+
+

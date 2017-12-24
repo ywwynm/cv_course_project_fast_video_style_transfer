@@ -13,6 +13,7 @@ from PIL import Image
 import numpy as np
 from argparse import ArgumentParser
 import os
+from global_variable import logging as log
 
 
 def build_parser():
@@ -30,17 +31,28 @@ def calculate_residual(frame_tensor_1, frame_tensor_2):
   return frame_tensor_2 - frame_tensor_1
 
 
-def get_residuals(in_dir, from_frame, to_frame):
-  print('calculating residuals for ' + in_dir + ', from: ' + str(from_frame) + ', to: ' + str(to_frame))
-  in_files = os.listdir(in_dir)
-  print('total files count: ' + str(len(in_files)))
+def get_residuals(frames_dir, frame_from, frame_to):
+  log.info('calculating residuals for ' + frames_dir + ', from: ' + str(frame_from) + ', to: ' + str(frame_to))
+  in_files = os.listdir(frames_dir)
+  log.info('total files count: ' + str(len(in_files)))
   residuals = []
-  for x in range(from_frame, to_frame - 1):
-    tensor_x = img_to_tensor(in_dir + '\\' + in_files[x - 1])
-    tensor_x_next = img_to_tensor(in_dir + '\\' + in_files[x])
+  for x in range(frame_from, frame_to):
+    tensor_x = img_to_tensor(frames_dir + '\\' + in_files[x - 1])
+    tensor_x_next = img_to_tensor(frames_dir + '\\' + in_files[x])
     residuals.append(calculate_residual(tensor_x, tensor_x_next))
-  print('residuals calculated, size: ' + str(len(residuals)))
+  log.info('residuals calculated, size: ' + str(len(residuals)))
   return residuals
+
+
+def save_residuals(frames_dir, data_dir, npy_name, frame_from, frame_to):
+  residuals = get_residuals(frames_dir, frame_from, frame_to)
+  if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
+  npy_path = data_dir + '/' + npy_name
+  log.info('saving residuals to ' + npy_path)
+  np.save(npy_path, residuals)
+  log.info('residuals saved, size: ' + str(os.stat(npy_path).st_size) + ' bytes')
+  return True
 
 
 def main():

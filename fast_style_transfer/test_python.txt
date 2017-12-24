@@ -1,0 +1,12 @@
+python evaluate.py --checkpoint ./models/scream.ckpt --in-path ./my_test/content/chicago.jpg --out-path ./my_test/output/
+
+python transform_video.py --checkpoint ./models/scream.ckpt --in-path ./my_test/content/fox.mp4 --out-path ./my_test/output/fox_cream.mp4 --device /gpu:0 --batch-size 4
+
+python transform_video.py --checkpoint ./models/scream.ckpt --in-path ./my_test/content/cut-Calgary-60s.mp4 --out-path ./my_test/output_1/cut-Calgary-60s_cream.mp4 --device /gpu:0 --batch-size 4
+
+cut-Calgary-60s
+
+python transform_video.py --checkpoint .\models\wave.ckpt --in-path .\my_test\content\output2_t_scale720.mp4 --out-path .\my_test\output_480p_2min_wave\output_wave.mp4 --device /gpu:0 --batch-size 4
+
+python transform_video.py --checkpoint .\models\wave.ckpt --in-path .\my_test\content\output10_t_312.mp4 --out-path .\my_test\output_208p_10min_wave\output_wave.mp4 --device /gpu:0 --batch-size 4
+
