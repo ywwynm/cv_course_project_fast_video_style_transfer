@@ -44,6 +44,17 @@ def get_residuals(frames_dir, frame_from, frame_to):
   return residuals
 
 
+def get_frames_tensors(frames_dir, frame_from, frame_to):
+  log.info('getting frames tensors for ' + frames_dir + ', from: ' + str(frame_from) + ', to: ' + str(frame_to))
+  in_files = os.listdir(frames_dir)
+  log.info('total files count: ' + str(len(in_files)))
+  frame_tensors = []
+  for x in range(frame_from, frame_to):
+    frame_tensors.append(img_to_tensor(frames_dir + '/' + in_files[x - 1]))
+  log.info('frames tensors gotten, size: ' + str(len(frame_tensors)))
+  return frame_tensors
+
+
 def save_residuals(frames_dir, data_dir, npy_name, frame_from, frame_to):
   residuals = get_residuals(frames_dir, frame_from, frame_to)
   if not os.path.exists(data_dir):

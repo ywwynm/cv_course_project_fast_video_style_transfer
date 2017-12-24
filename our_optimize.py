@@ -1,15 +1,22 @@
 import tensorflow as tf
 import network
-import time
+import time, os
 import numpy as np
 import our_utils
 from global_variable import logging as log
 import residual_calculator as rec
+import scipy.misc
+
+frame_ori_path = 'frames/wave_208p_2min_wave/in'
+frame_trs_path = 'frames/wave_208p_2min_wave/out'
+
 
 def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
-  res_ori_train = np.load(res_npy_ori_train_path)
-  res_trs_train = np.load(res_npy_trs_train_path)
+  # res_ori_train = np.load(res_npy_ori_train_path)
+  # res_trs_train = np.load(res_npy_trs_train_path)
+  res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 3001)
+  res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 3001)
 
   batch_shape = (batch_size, 208, 312, 3)
   with tf.Session() as sess:
@@ -80,6 +87,7 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
 
     res_ori_test = np.load(res_npy_ori_test_path)
     res_trs_test = np.load(res_npy_trs_test_path)
+
     X_batch = np.zeros(batch_shape, dtype=np.float32)
     Y_batch = np.zeros(batch_shape, dtype=np.float32)
     for i in range(0, int(len(res_ori_test))):
@@ -93,6 +101,7 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
       log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+
 
 def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_test_path, model_path_name):
   batch_shape = (1, 208, 312, 3)
@@ -101,9 +110,7 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
     preds = network.net(X_content / 255.0)
 
-    im_array = rec.img_to_tensor(first_frame_path_name)
-    Recon = im_array
-    Recon_array=[]
+    generated_frames_array=[]
 
     Y_content_flat = tf.reshape(Y_content, [-1, 312 * 208 * 3])
     preds_flat = tf.reshape(preds, [-1, 312 * 208 * 3])
@@ -111,12 +118,15 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
 
     tf.train.Saver().restore(sess, model_path_name)
 
-    res_ori_test = np.load(res_npy_ori_test_path)
-    res_trs_test = np.load(res_npy_trs_test_path)
+    # res_ori_test = np.load(res_npy_ori_test_path)
+    # res_trs_test = np.load(res_npy_trs_test_path)
+    res_ori_test = rec.get_frames_tensors(frame_ori_path, 3001, 3597)
+    res_trs_test = rec.get_frames_tensors(frame_trs_path, 3001, 3597)
+
     X_batch = np.zeros(batch_shape, dtype=np.float32)
     Y_batch = np.zeros(batch_shape, dtype=np.float32)
 
-    for i in range(0, int(len(res_ori_test))):
+    for i in range(int(len(res_ori_test))):
       X_batch_array, Y_batch_array = our_utils.next_batch(res_ori_test, res_trs_test, i)
       X_batch[0] = X_batch_array[0]
       Y_batch[0] = Y_batch_array[0]
@@ -126,8 +136,12 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
          X_content: X_batch, Y_content: Y_batch
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
-      log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
-      Recon = im_array + tup[1]
-      Recon_array.append(Recon)
+      log.info("test " + str(i) + ", average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+      generated_frames_array.append(tup[1])
+
+    output_dir = 'output/frames/wave_208p_2min_wave_not_residual/'
+    if not os.path.exists(output_dir): os.makedirs(output_dir)
+    for i in range(len(generated_frames_array)):
+      scipy.misc.imsave(output_dir + 'frame_' + str(i) + '.jpg', generated_frames_array[i][0])
 
 
