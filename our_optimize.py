@@ -2,9 +2,9 @@ import tensorflow as tf
 import network
 import time
 import numpy as np
-import utils
+import our_utils
 from global_variable import logging as log
-
+import residual_calculator as rec
 
 def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
@@ -30,7 +30,7 @@ def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_nam
     log.info('start optimizing at ' + str(all_start_time))
     while iterations * batch_size < num_train_examples:
       start_time = time.time()
-      X_batch_array, Y_batch_array = utils.new_batch(res_ori_train, res_trs_train, batch_size)
+      X_batch_array, Y_batch_array = our_utils.new_batch(res_ori_train, res_trs_train, batch_size)
       X_batch = np.zeros(batch_shape, dtype=np.float32)
       Y_batch = np.zeros(batch_shape, dtype=np.float32)
       for i in range(0, batch_size):
@@ -83,7 +83,7 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
     X_batch = np.zeros(batch_shape, dtype=np.float32)
     Y_batch = np.zeros(batch_shape, dtype=np.float32)
     for i in range(0, int(len(res_ori_test))):
-      X_batch_array, Y_batch_array = utils.next_batch(res_ori_test, res_trs_test, i)
+      X_batch_array, Y_batch_array = our_utils.next_batch(res_ori_test, res_trs_test, i)
       X_batch[0] = X_batch_array[0]
       Y_batch[0] = Y_batch_array[0]
 
@@ -93,4 +93,41 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
       log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+
+def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_test_path, model_path_name):
+  batch_shape = (1, 208, 312, 3)
+  with tf.Session() as sess:
+    X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
+    Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
+    preds = network.net(X_content / 255.0)
+
+    im_array = rec.img_to_tensor(first_frame_path_name)
+    Recon = im_array
+    Recon_array=[]
+
+    Y_content_flat = tf.reshape(Y_content, [-1, 312 * 208 * 3])
+    preds_flat = tf.reshape(preds, [-1, 312 * 208 * 3])
+    loss = tf.reduce_mean(tf.reduce_sum(tf.square(preds_flat - Y_content_flat), reduction_indices=[1]))
+
+    tf.train.Saver().restore(sess, model_path_name)
+
+    res_ori_test = np.load(res_npy_ori_test_path)
+    res_trs_test = np.load(res_npy_trs_test_path)
+    X_batch = np.zeros(batch_shape, dtype=np.float32)
+    Y_batch = np.zeros(batch_shape, dtype=np.float32)
+
+    for i in range(0, int(len(res_ori_test))):
+      X_batch_array, Y_batch_array = our_utils.next_batch(res_ori_test, res_trs_test, i)
+      X_batch[0] = X_batch_array[0]
+      Y_batch[0] = Y_batch_array[0]
+
+      to_get = [loss, preds]
+      test_feed_dict = {
+         X_content: X_batch, Y_content: Y_batch
+      }
+      tup = sess.run(to_get, feed_dict=test_feed_dict)
+      log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+      Recon = im_array + tup[1]
+      Recon_array.append(Recon)
+
 

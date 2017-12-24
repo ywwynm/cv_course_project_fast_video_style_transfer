@@ -1,4 +1,4 @@
-import optimize
+import our_optimize
 import residual_calculator
 import os
 import transform_video as trsv
@@ -24,12 +24,12 @@ frame_to_train = 1501
 frame_from_test = 1501
 frame_to_test = 1797
 
-num_train_examples = 20
+num_train_examples = 12
 model_save_path = 'models/' + train_name + '/'
 if not os.path.exists(model_save_path): os.makedirs(model_save_path)
 model_save_path_name = model_save_path + 'model.ckpt'
 
-
+first_frame_path_name = res_trs_frames_dir + '/frame_' + str(frame_from_test) + '.png'
 
 class TrsvOpts:
   checkpoint: str
@@ -65,9 +65,15 @@ def calculate_and_save_residuals():
 
 trsv.transform_video_and_generate_frames(trsv_opts)
 calculate_and_save_residuals()
-optimize.optimize(
+our_optimize.optimize(
   res_npy_store_dir + '/res_ori_train.npy',
   res_npy_store_dir + '/res_trs_train.npy',
   model_save_path_name, num_train_examples)
+
+our_optimize.generate_frames(
+  first_frame_path_name,
+  res_npy_store_dir+'res_ori_test.npy',
+  res_npy_store_dir + 'res_trs_test.npy',
+  model_save_path_name)
 
 

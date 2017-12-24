@@ -1,5 +1,7 @@
 import logging
+import os
 
+if not os.path.exists('logs/'): os.makedirs('logs/')
 # set up logging to file - see previous section for more details
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
