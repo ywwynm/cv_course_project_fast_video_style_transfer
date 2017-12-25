@@ -120,8 +120,8 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
 
     # res_ori_test = np.load(res_npy_ori_test_path)
     # res_trs_test = np.load(res_npy_trs_test_path)
-    res_ori_test = rec.get_frames_tensors(frame_ori_path, 3001, 3597)
-    res_trs_test = rec.get_frames_tensors(frame_trs_path, 3001, 3597)
+    res_ori_test = rec.get_frames_tensors(frame_ori_path, 15001, 17982)
+    res_trs_test = rec.get_frames_tensors(frame_trs_path, 15001, 17982)
 
     X_batch = np.zeros(batch_shape, dtype=np.float32)
     Y_batch = np.zeros(batch_shape, dtype=np.float32)
@@ -139,7 +139,7 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
       log.info("test " + str(i) + ", average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
       generated_frames_array.append(tup[1])
 
-    output_dir = 'output/frames/wave_208p_2min_wave_not_residual/'
+    output_dir = 'output/frames/wave_208p_10min_wave_iter30000/'
     if not os.path.exists(output_dir): os.makedirs(output_dir)
     for i in range(len(generated_frames_array)):
       scipy.misc.imsave(output_dir + 'frame_' + str(i) + '.jpg', generated_frames_array[i][0])

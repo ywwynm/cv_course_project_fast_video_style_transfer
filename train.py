@@ -6,7 +6,7 @@ import fast_style_transfer.transform_video as trsv
 # mkdirs
 if not os.path.exists('output/video/'): os.makedirs('output/video/')
 
-train_name = 'wave_208p_10min_wave_not_residual_20000_ite'
+train_name = 'wave_208p_10min_wave_iter30000'
 
 trsv_model_path_name = 'fast_style_transfer/models/wave.ckpt'
 trsv_ori_video_path_name = 'input/output10_t_312.mp4'
@@ -65,15 +65,21 @@ def calculate_and_save_residuals():
 
 # trsv.transform_video_and_generate_frames(trsv_opts)
 # calculate_and_save_residuals()
-our_optimize.optimize(
-  res_npy_store_dir + '/res_ori_train.npy',
-  res_npy_store_dir + '/res_trs_train.npy',
-  model_save_path_name, num_train_examples)
+# our_optimize.optimize(
+#   res_npy_store_dir + '/res_ori_train.npy',
+#   res_npy_store_dir + '/res_trs_train.npy',
+#   model_save_path_name, num_train_examples)
 
 # our_optimize.generate_frames(
-  # first_frame_path_name,
-  # res_npy_store_dir+'res_ori_test.npy',
-  # res_npy_store_dir + 'res_trs_test.npy',
-  # model_save_path_name)
+#   first_frame_path_name,
+#   res_npy_store_dir + 'res_ori_test.npy',
+#   res_npy_store_dir + 'res_trs_test.npy',
+#   model_save_path_name)
+
+our_optimize.generate_frames(
+  first_frame_path_name,
+  res_npy_store_dir + 'res_ori_test.npy',
+  res_npy_store_dir + 'res_trs_test.npy',
+  'models/wave_208p_10min_wave_ite30000/model.ckpt')
 
 
