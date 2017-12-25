@@ -7,16 +7,16 @@ from global_variable import logging as log
 import residual_calculator as rec
 import scipy.misc
 
-frame_ori_path = 'frames/wave_208p_2min_wave/in'
-frame_trs_path = 'frames/wave_208p_2min_wave/out'
+frame_ori_path = 'frames/wave_208p_10min_wave/in'
+frame_trs_path = 'frames/wave_208p_10min_wave/out'
 
 
 def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
   # res_ori_train = np.load(res_npy_ori_train_path)
   # res_trs_train = np.load(res_npy_trs_train_path)
-  res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 3001)
-  res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 3001)
+  res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 15001)
+  res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 15001)
 
   batch_shape = (batch_size, 208, 312, 3)
   with tf.Session() as sess:
