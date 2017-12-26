@@ -24,7 +24,7 @@ frame_to_train = 15001
 frame_from_test = 15001
 frame_to_test = 17982
 
-num_train_examples = 20000
+num_train_examples = 128000
 model_save_path = 'models/' + train_name + '/'
 if not os.path.exists(model_save_path): os.makedirs(model_save_path)
 model_save_path_name = model_save_path + 'model.ckpt'
@@ -70,8 +70,8 @@ def calculate_and_save_residuals():
 #   res_trs_frames_dir,
 #   model_save_path_name, num_train_examples)
 our_optimize.optimize(
-  res_npy_store_dir + 'res_ori_train.npy',
-  res_npy_store_dir + 'res_trs_train.npy',
+  res_npy_store_dir + '/res_ori_train.npy',
+  res_npy_store_dir + '/res_trs_train.npy',
   model_save_path_name, num_train_examples)
 
 # our_optimize.generate_frames(

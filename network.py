@@ -7,8 +7,9 @@ def net(image):
   conv1 = _conv_layer(image, 32, 9, 1)
   conv2 = _conv_layer(conv1, 64, 3, 2)
   conv3 = _conv_layer(conv2, 128, 3, 2)
+  conv4 = _conv_layer(conv3, 256, 3, 2)
   # conv4 = _conv_layer(conv3, 256, 3, 2)
-  resid1 = _residual_block(conv3, 3)
+  resid1 = _residual_block(conv4, 3)
   resid2 = _residual_block(resid1, 3)
   resid3 = _residual_block(resid2, 3)
   resid4 = _residual_block(resid3, 3)
@@ -44,10 +45,11 @@ def net(image):
   # resid59 = _residual_block(resid58, 3)
   # resid60 = _residual_block(resid59, 3)
   # conv_t1 = _conv_tranpose_layer(resid5, 128, 3, 2)
-  conv_t2 = _conv_tranpose_layer(resid5, 64, 3, 2)
+  conv_t1 = _conv_tranpose_layer(resid5, 128, 3, 2)
+  conv_t2 = _conv_tranpose_layer(conv_t1, 64, 3, 2)
   conv_t3 = _conv_tranpose_layer(conv_t2, 32, 3, 2)
   conv_t4 = _conv_layer(conv_t3, 3, 9, 1, relu=False)
-  # preds = tf.nn.tanh(conv_t4) * 150 + 255. / 2
+  #preds = tf.nn.tanh(conv_t4) * 150 + 255. / 2
   preds = tf.nn.tanh(conv_t4) * 300
   return preds
 
@@ -58,8 +60,8 @@ def _conv_layer(net, num_filters, filter_size, strides, relu=True):
   net = tf.nn.conv2d(net, weights_init, strides_shape, padding='SAME')
   net = _instance_norm(net)
   if relu:
-    # net = tf.nn.relu(net)
-    net = tf.nn.tanh(net)
+    net = tf.nn.relu(net)
+    #net = tf.nn.tanh(net)
 
   return net
 
@@ -81,8 +83,8 @@ def _conv_tranpose_layer(net, num_filters, filter_size, strides):
 
 
 def _residual_block(net, filter_size=3):
-  tmp = _conv_layer(net, 128, filter_size, 1)
-  return net + _conv_layer(tmp, 128, filter_size, 1, relu=False)
+  tmp = _conv_layer(net, 256, filter_size, 1)
+  return net + _conv_layer(tmp, 256, filter_size, 1, relu=False)
 
 
 def _instance_norm(net, train=True):

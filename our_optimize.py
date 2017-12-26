@@ -10,10 +10,10 @@ import scipy.misc
 # frame_ori_path = 'frames/wave_208p_10min_wave/in'
 # frame_trs_path = 'frames/wave_208p_10min_wave/out'
 
-# img_width = 312
-# img_height = 208
-img_width = 720
-img_height = 480
+img_width = 312
+img_height = 208
+# img_width = 720
+# img_height = 480
 
 def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
              # frame_ori_path, frame_trs_path, model_save_path_name,
@@ -27,7 +27,7 @@ def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_nam
   with tf.Session() as sess:
     X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
-    preds = network.net(X_content / 255.0)
+    preds = network.net((X_content + 255.0) / 255.0 / 2)
 
     # reshape
     Y_content_flat = tf.reshape(Y_content, [-1, img_width * img_height * 3])
