@@ -6,7 +6,7 @@ if not os.path.exists('logs/'): os.makedirs('logs/')
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M',
-                    filename='logs/log_wave_208p_10min_iter30000_gen_frame.log')
+                    filename='logs/log_wave_480p_10min_iter40000.log')
 # define a Handler which writes INFO messages or higher to the sys.stderr
 console = logging.StreamHandler()
 console.setLevel(logging.INFO)

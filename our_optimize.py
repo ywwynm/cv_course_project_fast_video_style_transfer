@@ -7,26 +7,31 @@ from global_variable import logging as log
 import residual_calculator as rec
 import scipy.misc
 
-frame_ori_path = 'frames/wave_208p_10min_wave/in'
-frame_trs_path = 'frames/wave_208p_10min_wave/out'
+# frame_ori_path = 'frames/wave_208p_10min_wave/in'
+# frame_trs_path = 'frames/wave_208p_10min_wave/out'
 
+# img_width = 312
+# img_height = 208
+img_width = 720
+img_height = 480
 
-def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
+def optimize(#res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
+             frame_ori_path, frame_trs_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
   # res_ori_train = np.load(res_npy_ori_train_path)
   # res_trs_train = np.load(res_npy_trs_train_path)
   res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 15001)
   res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 15001)
 
-  batch_shape = (batch_size, 208, 312, 3)
+  batch_shape = (batch_size, img_height, img_width, 3)
   with tf.Session() as sess:
     X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
     preds = network.net(X_content / 255.0)
 
     # reshape
-    Y_content_flat = tf.reshape(Y_content, [-1, 312 * 208 * 3])
-    preds_flat = tf.reshape(preds, [-1, 312 * 208 * 3])
+    Y_content_flat = tf.reshape(Y_content, [-1, img_width * img_height * 3])
+    preds_flat = tf.reshape(preds, [-1, img_width * img_height * 3])
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(preds_flat - Y_content_flat), reduction_indices=[1]))
 
     train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
@@ -61,7 +66,7 @@ def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_nam
       }
 
       tup = sess.run(to_get, feed_dict=test_feed_dict)
-      log.info("iterations:" + str(iterations) + ", loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)) +
+      log.info("iterations:" + str(iterations) + ", loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)) +
             ", start_time: " + str(start_time) +
             ", end_time: " + str(end_time) + ", delta_time: " + str(delta_time))
 
@@ -73,14 +78,14 @@ def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_nam
 
 
 def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name):
-  batch_shape = (1, 208, 312, 3)
+  batch_shape = (1, img_height, img_width, 3)
   with tf.Session() as sess:
     X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
     preds = network.net(X_content / 255.0)
 
-    Y_content_flat = tf.reshape(Y_content, [-1, 312 * 208 * 3])
-    preds_flat = tf.reshape(preds, [-1, 312 * 208 * 3])
+    Y_content_flat = tf.reshape(Y_content, [-1, img_width * img_height * 3])
+    preds_flat = tf.reshape(preds, [-1, img_width * img_height * 3])
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(preds_flat - Y_content_flat), reduction_indices=[1]))
 
     tf.train.Saver().restore(sess, model_path_name)
@@ -100,11 +105,11 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
          X_content: X_batch, Y_content: Y_batch
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
-      log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+      log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)))
 
 
 def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_test_path, model_path_name):
-  batch_shape = (1, 208, 312, 3)
+  batch_shape = (1, img_height, img_width, 3)
   with tf.Session() as sess:
     X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
@@ -112,8 +117,8 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
 
     generated_frames_array=[]
 
-    Y_content_flat = tf.reshape(Y_content, [-1, 312 * 208 * 3])
-    preds_flat = tf.reshape(preds, [-1, 312 * 208 * 3])
+    Y_content_flat = tf.reshape(Y_content, [-1, img_width * img_height * 3])
+    preds_flat = tf.reshape(preds, [-1, img_width * img_height * 3])
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(preds_flat - Y_content_flat), reduction_indices=[1]))
 
     tf.train.Saver().restore(sess, model_path_name)
@@ -136,7 +141,7 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
          X_content: X_batch, Y_content: Y_batch
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
-      log.info("test " + str(i) + ", average loss: " + str(np.sqrt(tup[0] / 312 / 208 / 3)))
+      log.info("test " + str(i) + ", average loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)))
       generated_frames_array.append(tup[1])
 
     output_dir = 'output/frames/wave_208p_10min_wave_iter30000/'
