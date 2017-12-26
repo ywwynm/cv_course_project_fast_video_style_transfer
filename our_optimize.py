@@ -15,13 +15,13 @@ import scipy.misc
 img_width = 720
 img_height = 480
 
-def optimize(#res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
-             frame_ori_path, frame_trs_path, model_save_path_name,
+def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
+             # frame_ori_path, frame_trs_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
-  # res_ori_train = np.load(res_npy_ori_train_path)
-  # res_trs_train = np.load(res_npy_trs_train_path)
-  res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 15001)
-  res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 15001)
+  res_ori_train = np.load(res_npy_ori_train_path)
+  res_trs_train = np.load(res_npy_trs_train_path)
+  # res_ori_train = rec.get_frames_tensors(frame_ori_path, 1, 15001)
+  # res_trs_train = rec.get_frames_tensors(frame_trs_path, 1, 15001)
 
   batch_shape = (batch_size, img_height, img_width, 3)
   with tf.Session() as sess:
