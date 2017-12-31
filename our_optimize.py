@@ -7,16 +7,12 @@ from global_variable import logging as log
 import residual_calculator as rec
 import scipy.misc
 
-# frame_ori_path = 'frames/wave_208p_10min_wave/in'
-# frame_trs_path = 'frames/wave_208p_10min_wave/out'
-
 img_width = 312
 img_height = 208
 # img_width = 720
 # img_height = 480
 
 def optimize(res_npy_ori_train_path, res_npy_trs_train_path, model_save_path_name,
-             # frame_ori_path, frame_trs_path, model_save_path_name,
              num_train_examples = 200, batch_size=4, learning_rate=1e-3):
   res_ori_train = np.load(res_npy_ori_train_path)
   res_trs_train = np.load(res_npy_trs_train_path)
@@ -108,14 +104,18 @@ def evaluate_model(res_npy_ori_test_path, res_npy_trs_test_path, model_path_name
       log.info("test " + str(i) + "average loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)))
 
 
-def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_test_path, model_path_name):
+def generate_frames(
+    first_frame_path_name,
+    res_npy_ori_test_path, res_npy_trs_test_path,
+    model_path_name, gen_frames_path):
   batch_shape = (1, img_height, img_width, 3)
   with tf.Session() as sess:
     X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
     Y_content = tf.placeholder(tf.float32, shape=batch_shape, name="Y_content")
-    preds = network.net(X_content / 255.0)
+    preds = network.net((X_content + 255.0) / 255.0 / 2)
 
     generated_frames_array=[]
+    last_frame = rec.img_to_tensor(first_frame_path_name)
 
     Y_content_flat = tf.reshape(Y_content, [-1, img_width * img_height * 3])
     preds_flat = tf.reshape(preds, [-1, img_width * img_height * 3])
@@ -123,10 +123,10 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
 
     tf.train.Saver().restore(sess, model_path_name)
 
-    # res_ori_test = np.load(res_npy_ori_test_path)
-    # res_trs_test = np.load(res_npy_trs_test_path)
-    res_ori_test = rec.get_frames_tensors(frame_ori_path, 15001, 17982)
-    res_trs_test = rec.get_frames_tensors(frame_trs_path, 15001, 17982)
+    res_ori_test = np.load(res_npy_ori_test_path)
+    res_trs_test = np.load(res_npy_trs_test_path)
+    # res_ori_test = rec.get_frames_tensors(frame_ori_path, 15001, 17982)
+    # res_trs_test = rec.get_frames_tensors(frame_trs_path, 15001, 17982)
 
     X_batch = np.zeros(batch_shape, dtype=np.float32)
     Y_batch = np.zeros(batch_shape, dtype=np.float32)
@@ -141,12 +141,12 @@ def generate_frames(first_frame_path_name, res_npy_ori_test_path, res_npy_trs_te
          X_content: X_batch, Y_content: Y_batch
       }
       tup = sess.run(to_get, feed_dict=test_feed_dict)
-      log.info("test " + str(i) + ", average loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)))
-      generated_frames_array.append(tup[1])
+      log.info("test " + str(i) + ", loss: " + str(np.sqrt(tup[0] / img_width / img_height / 3)))
+      last_frame = last_frame + tup[1]
+      generated_frames_array.append(last_frame)
 
-    output_dir = 'output/frames/wave_208p_10min_wave_iter30000/'
-    if not os.path.exists(output_dir): os.makedirs(output_dir)
+    if not os.path.exists(gen_frames_path): os.makedirs(gen_frames_path)
     for i in range(len(generated_frames_array)):
-      scipy.misc.imsave(output_dir + 'frame_' + str(i) + '.jpg', generated_frames_array[i][0])
+      scipy.misc.imsave(gen_frames_path + 'frame_' + str(i) + '.jpg', generated_frames_array[i][0])
 
 
